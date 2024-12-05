@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<!-- Add Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Optional: Add a theme -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<style>
+    /* Custom styles for the date picker */
+    .flatpickr-calendar {
+        box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+    }
+    .flatpickr-month {
+        height: 40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Set Monthly Budget</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="messages mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="budget_amount" class="form-label">Budget Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" 
+                                    class="form-control" 
+                                    id="budget_amount" 
+                                    name="budget_amount" 
+                                    step="0.01" 
+                                    required
+                                    min="0"
+                                    value="{{ current_budget.amount|default:'' }}">
+                                <div class="invalid-feedback">
+                                    Please enter a valid budget amount
+                                </div>
+                            </div>
+                            <div class="form-text text-muted">
+                                Enter your monthly budget target
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="budget_month" class="form-label">Month</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="budget_month" 
+                                       name="budget_month" 
+                                       required
+                                       placeholder="Select Month"
+                                       value="{{ current_budget.month|date:'F Y'|default:'' }}"
+                                       data-input>
+                                <div class="invalid-feedback">
+                                    Please select a month
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Choose a category...</option>
+                                <option value="groceries" {% if current_budget.category == 'groceries' %}selected{% endif %}>Groceries</option>
+                                <option value="utilities" {% if current_budget.category == 'utilities' %}selected{% endif %}>Utilities</option>
+                                <option value="entertainment" {% if current_budget.category == 'entertainment' %}selected{% endif %}>Entertainment</option>
+                                <option value="transportation" {% if current_budget.category == 'transportation' %}selected{% endif %}>Transportation</option>
+                                <option value="other" {% if current_budget.category == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a category
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if current_budget %}Update{% else %}Set{% endif %} Budget
+                            </button>
+                            <a href="{% url 'transactions:transactions' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Enable Bootstrap form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}
+{% endblock %}
